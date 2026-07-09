@@ -102,8 +102,10 @@ options.add_experimental_option(
         "download.directory_upgrade": True,
     },
 )
+ARTIFACT_DIR = "artifacts"
+ARTIFACT_DIR = os.path.abspath("artifacts")
+os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
-driver = webdriver.Chrome(options=options)
 driver.maximize_window()
 wait = WebDriverWait(driver, 30)
 
