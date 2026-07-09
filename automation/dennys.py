@@ -106,15 +106,13 @@ ARTIFACT_DIR = "artifacts"
 ARTIFACT_DIR = os.path.abspath("artifacts")
 os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
-chrome_options.add_experimental_option("prefs", prefs)
-
 driver = webdriver.Chrome(
     service=Service("/usr/bin/chromedriver"),
     options=chrome_options
 )
-
 driver.maximize_window()
 wait = WebDriverWait(driver, 30)
+
 
 # ── LOGIN ─────────────────────────────────────────────────────────────────────
 
