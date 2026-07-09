@@ -1,0 +1,79 @@
+name: Dennys Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Target month (1-12)"
+        required: true
+      year:
+        description: "Target year (e.g. 2026)"
+        required: true
+      date_from_day:
+        description: "First day of the range within the target month (default 1)"
+        required: false
+        default: "1"
+      date_to_day:
+        description: "Last day of the range within the target month (default: last day of month)"
+        required: false
+        default: ""
+      run_id:
+        description: "Unique run id from the frontend (tags the output files)"
+        required: true
+
+jobs:
+  run-dennys-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TARGET_MONTH: ${{ github.event.inputs.month }}
+      TARGET_YEAR: ${{ github.event.inputs.year }}
+      DATE_FROM_DAY: ${{ github.event.inputs.date_from_day }}
+      DATE_TO_DAY: ${{ github.event.inputs.date_to_day }}
+      RUN_ID: ${{ github.event.inputs.run_id }}
+      DS_USERNAME: ${{ secrets.DS_USERNAME }}
+      DS_PASSWORD: ${{ secrets.DS_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Chrome + matching chromedriver
+        uses: browser-actions/setup-chrome@v1
+        with:
+          install-chromedriver: true
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: python -m playwright install --with-deps chromium
+
+      - name: Step 1 — Scrape Denny's review feed for the target date range
+        working-directory: automation
+        run: python dennys.py
+
+      - name: Step 2 — Build running review tracker
+        working-directory: automation
+        run: python review-tracker.py
+
+      - name: Step 3 — Build Dennys_record (xlsx + json) and upload
+        working-directory: automation
+        run: python dennys-record.py
+
+      - name: Step 4 — Build Dennys_Summary (xlsx + json) and upload
+        working-directory: automation
+        run: python dennys-summary.py
+
+      - name: Upload run artifacts (debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dennys-report-${{ github.event.inputs.run_id }}
+          path: automation/artifacts/**
+          retention-days: 7

@@ -1,0 +1,7 @@
+# These exist for GitHub Actions, not for Vercel — keep Vercel from trying
+# to auto-detect this repo as a Python project.
+automation/
+requirements.txt
+ds_requirnment.txt
+.github/
+README.md

@@ -1,0 +1,70 @@
+name: BK Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Target month (1-12)"
+        required: true
+      year:
+        description: "Target year (e.g. 2026)"
+        required: true
+      run_id:
+        description: "Unique run id from the frontend (tags the output files)"
+        required: true
+
+jobs:
+  run-bk-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TARGET_MONTH: ${{ github.event.inputs.month }}
+      TARGET_YEAR: ${{ github.event.inputs.year }}
+      RUN_ID: ${{ github.event.inputs.run_id }}
+      BK_USERNAME: ${{ secrets.BK_USERNAME }}
+      BK_PASSWORD: ${{ secrets.BK_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Chrome + matching chromedriver
+        uses: browser-actions/setup-chrome@v1
+        with:
+          install-chromedriver: true
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Step 1 — Download BK guest response exports (IRCR + DCR)
+        working-directory: automation
+        run: python download.py
+
+      - name: Step 2 — Parse review star ratings
+        working-directory: automation
+        run: python reviewsparser.py
+
+      - name: Step 3 — Categorize 1-2-3 star reviews
+        working-directory: automation
+        run: python categories.py
+
+      - name: Step 4 — Build per-restaurant category report
+        working-directory: automation
+        run: python totalreviews.py
+
+      - name: Step 5 — Combine into Final_BK_Report (xlsx + json) and upload
+        working-directory: automation
+        run: python combinefiles.py
+
+      - name: Upload run artifacts (debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bk-report-${{ github.event.inputs.run_id }}
+          path: automation/artifacts/**
+          retention-days: 7

@@ -1,0 +1,14 @@
+# Secrets & credentials
+.env
+credentials/
+*.json
+
+# Downloads
+downloads/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/

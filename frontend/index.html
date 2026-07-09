@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Review Report Runner</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <h1>Review Report Runner</h1>
+    <p class="subtitle">Pick a source and a period, then run the report.</p>
+
+    <section class="field">
+      <label>Report source</label>
+      <div class="toggle-group" id="sourceToggle">
+        <button type="button" class="toggle active" data-value="bk">Burger King</button>
+        <button type="button" class="toggle" data-value="dennys">Denny's</button>
+      </div>
+    </section>
+
+    <section class="field">
+      <label for="period">Month</label>
+      <input type="month" id="period" />
+    </section>
+
+    <section class="field" id="dennysDateRange" hidden>
+      <label>Date range within the month (Denny's only)</label>
+      <div class="row">
+        <div>
+          <label class="sub-label" for="dayFrom">From day</label>
+          <input type="number" id="dayFrom" min="1" max="31" value="1" />
+        </div>
+        <div>
+          <label class="sub-label" for="dayTo">To day</label>
+          <input type="number" id="dayTo" min="1" max="31" placeholder="last day" />
+        </div>
+      </div>
+    </section>
+
+    <button id="runBtn" class="run-btn">Run report</button>
+
+    <section id="status" class="status" hidden>
+      <div class="status-row">
+        <span id="statusDot" class="dot"></span>
+        <span id="statusText">Queued…</span>
+      </div>
+      <a id="logsLink" href="#" target="_blank" rel="noopener" hidden>View run logs on GitHub →</a>
+    </section>
+
+    <section id="results" class="results" hidden>
+      <h2>Files ready</h2>
+      <ul id="resultsList"></ul>
+    </section>
+
+    <section id="errorBox" class="error" hidden></section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
